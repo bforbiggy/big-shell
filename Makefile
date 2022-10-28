@@ -6,4 +6,4 @@ run:
 	./shell
 
 clean:
-	rm -r shell *.0
+	rm -r shell *.o

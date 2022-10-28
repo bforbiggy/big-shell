@@ -12,7 +12,7 @@ int main(){
 
 	while(true){
 		// Display shell prefix
-		printf("Shell: ");
+		printf("[bish %s]$", dir);
 		fflush(stdout);
 
 		// Parse user input
