@@ -18,4 +18,6 @@ typedef struct Program{
 	int out;
 } Program;
 
+Program *parseProgram(char *line);
+
 #endif

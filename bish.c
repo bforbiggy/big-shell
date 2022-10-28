@@ -20,9 +20,7 @@ void processLine(Shell *shell){
 	buffer[strlen(buffer) - 1] = '\0';
 
 	// Parse program then run
-	Program *program = malloc(sizeof(Program));
-	program->args = malloc(sizeof(char *));
-	program->args[0] = "ls";
+	Program *program = parseProgram(shell->buffer);
 	runProgram(*program);
 }
 
