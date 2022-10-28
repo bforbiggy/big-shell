@@ -7,6 +7,8 @@ void processLine(char *line){
 int main(){
 	// Shell initialization
 	buffer = malloc(sizeof(char) * MAX_BUFFER);
+	dir = malloc(sizeof(char) * (PATH_MAX+1));
+	getcwd(dir, PATH_MAX);
 
 	while(true){
 		// Display shell prefix

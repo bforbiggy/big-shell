@@ -4,3 +4,6 @@ default:
 run:
 	gcc shell.c -o shell -Wall -Wextra
 	./shell
+
+clean:
+	rm -r shell *.0
