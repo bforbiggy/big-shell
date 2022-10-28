@@ -22,6 +22,7 @@ void processLine(Shell *shell){
 	// Parse program then run
 	Program *program = parseProgram(shell->buffer);
 	runProgram(*program);
+	free(program);
 }
 
 int main(){
@@ -30,7 +31,7 @@ int main(){
 	setvbuf(stdout, NULL, _IONBF, 0);
 
 	// Shell initialization
-	Shell *shell = malloc(sizeof(shell));
+	Shell *shell = malloc(sizeof(Shell));
 	getcwd(shell->dir, PATH_MAX);
 
 	// Run through program

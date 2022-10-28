@@ -2,15 +2,20 @@
 
 Program *parseProgram(char *line){
 	Program *program = malloc(sizeof(Program));
-	program->args = malloc(sizeof(char *) * 1);
-	program->args[0] = "ls";
 
-	// Linkedlist of args
+
+	// Split input string into args
 	int count;
-	Node* head = split(line, " ", &count);
-	while(head != NULL){
-		printf("Node value:%s\n", (char*)head->val);
-		head = head->next;
+	Node* node = split(line, " ", &count);
+	Node* head = node;
+
+	// Merge arguments into array
+	program->args = malloc(sizeof(char*) * (count+1));
+	for(int i = 0; i < count; i++){
+		program->args[i] = node->val;
+		node = node->next;
 	}
+	program->args[count] = NULL;
+	freeList(head);
 	return program;
 }
