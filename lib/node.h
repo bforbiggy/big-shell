@@ -10,5 +10,6 @@ typedef struct Node{
 
 Node *init(void *val, Node *next);
 void freeList(Node *node);
+void **toArray(Node *head, int count);
 
 #endif
