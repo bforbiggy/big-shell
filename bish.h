@@ -11,4 +11,7 @@
 
 #include "shell.h"
 
+#define CD ("cd")
+#define EXIT ("exit")
+
 #endif

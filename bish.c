@@ -15,13 +15,20 @@ void runProgram(const Program p){
 }
 
 void processLine(Shell *shell){
-	// Sanitize input
-	char *buffer = shell->buffer;
-	buffer[strlen(buffer) - 1] = '\0';
-
-	// Parse program then run
+	// Sanitize input then parse
+	shell->buffer[strlen(shell->buffer) - 1] = '\0';
 	Program *program = parseProgram(shell->buffer);
-	runProgram(*program);
+
+	// System command: change directory
+	if(!strcasecmp(program->args[0], CD)){
+		changeDirectory(*program);
+		getcwd(shell->dir, PATH_MAX);
+	}
+	// System command: exit
+	else if(!strcasecmp(program->args[0], EXIT)){
+		exit(0);
+	}
+	else runProgram(*program);
 	free(program);
 }
 
