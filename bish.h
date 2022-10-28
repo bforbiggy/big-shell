@@ -10,6 +10,5 @@
 #include <sys/wait.h>
 
 #include "shell.h"
-#include "util.h"
 
 #endif

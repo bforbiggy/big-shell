@@ -1,8 +1,7 @@
 default:
-	gcc bish.c util.c shell.c -o bish -Wall -Wextra
+	gcc bish.c -o bish -Wall -Wextra
 
-run:
-	gcc bish.c util.c -o bish -Wall -Wextra
+run: default
 	./bish
 
 clean:

@@ -2,6 +2,8 @@
 #define SHELL_HEADER
 
 #include <limits.h>
+#include "lib/util.h"
+#include "lib/node.c"
 
 #define MAX_BUFFER (1000)
 

@@ -19,9 +19,9 @@ void processLine(Shell *shell){
 	char *buffer = shell->buffer;
 	buffer[strlen(buffer) - 1] = '\0';
 
-	// Run program
+	// Parse program then run
 	Program *program = malloc(sizeof(Program));
-	program->args = malloc(sizeof(char *) * 1);
+	program->args = malloc(sizeof(char *));
 	program->args[0] = "ls";
 	runProgram(*program);
 }
