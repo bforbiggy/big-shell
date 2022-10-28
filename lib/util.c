@@ -13,17 +13,17 @@ Node *split(char* string, const char delim[], int* size){
 	*size = 1;
 
 	// Initialize head with token
-	Node *head = malloc(sizeof(Node));
-	head->val = token;
-	head->next = NULL;
+	Node *head = init(token, NULL);
 
 	// Parse remaining tokens
 	Node *curr = head;
-	while((token = strtok(string, delim)) != NULL){
+	while((token = strtok(NULL, delim)) != NULL){
 		curr->next = init(token, NULL);
 		curr = curr->next;
 		(*size)++;
 	}
+
+	return head;
 }
 
 /**

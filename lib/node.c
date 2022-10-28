@@ -3,7 +3,7 @@
 Node *init(void *val, Node *next){
 	Node *node = malloc(sizeof(Node));
 	node->val = val;
-	node->next = NULL;
+	node->next = next;
 	return node;
 }
 

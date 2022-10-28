@@ -1,8 +1,8 @@
 default:
-	gcc bish.c shell.c -o bish -Wall -Wextra
+	gcc bish.c shell.c lib/node.c lib/util.c -o bish -Wall -Wextra
 
 run: default
 	./bish
 
 clean:
-	rm -r bish *.o
+	rm bish *.o lib/*.o

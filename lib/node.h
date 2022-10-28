@@ -8,7 +8,7 @@ typedef struct Node{
 	struct Node *next;
 }Node;
 
-Node *init(void *val, Node next);
+Node *init(void *val, Node *next);
 void freeList(Node *node);
 
 #endif
