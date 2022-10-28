@@ -5,23 +5,22 @@ void processLine(char *line){
 }
 
 int main(){
+	// Automatic flushing
+	setvbuf(stdin, NULL, _IONBF, 0);
+	setvbuf(stdout, NULL, _IONBF, 0);
+
 	// Shell initialization
 	buffer = malloc(sizeof(char) * MAX_BUFFER);
 	dir = malloc(sizeof(char) * (PATH_MAX+1));
 	getcwd(dir, PATH_MAX);
 
 	while(true){
-		// Display shell prefix
-		printf("[bish %s]$", dir);
-		fflush(stdout);
-
-		// Parse user input
+		// Display shell prefix and get user input
+		printf("[bish %s]$ ", dir);
 		fgets(buffer, MAX_BUFFER, stdin);
-		fflush(stdin);
-		printf("Index: %d\n", lastIndex(buffer, '\n'));
-		buffer[strlen(buffer) - 1] = '\0';
 
-		// Attempt to run input
+		// Sanitize and run input
+		buffer[strlen(buffer) - 1] = '\0';
 		processLine(buffer);
 	}
 	return 0;
