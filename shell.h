@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <string.h>
+#include "util.h"
 
 #define MAX_BUFFER (1000)
 char *buffer;

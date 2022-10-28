@@ -18,6 +18,7 @@ int main(){
 		// Parse user input
 		fgets(buffer, MAX_BUFFER, stdin);
 		fflush(stdin);
+		printf("Index: %d\n", lastIndex(buffer, '\n'));
 		buffer[strlen(buffer) - 1] = '\0';
 
 		// Attempt to run input
