@@ -1,19 +1,19 @@
 #ifndef SHELL_HEADER
 #define SHELL_HEADER
 
-// Required libraries
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-
-// Helpful libraries
 #include <limits.h>
-#include <stdbool.h>
-#include <string.h>
-#include "util.h"
 
 #define MAX_BUFFER (1000)
-char *buffer;
-char *dir;
+
+typedef struct Shell{
+	char buffer[MAX_BUFFER];
+	char dir[PATH_MAX+1];
+} Shell;
+
+typedef struct Program{
+	char **args;
+	int in;
+	int out;
+} Program;
 
 #endif

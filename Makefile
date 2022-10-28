@@ -1,9 +1,9 @@
 default:
-	gcc shell.c util.c -o shell -Wall -Wextra
+	gcc bish.c util.c shell.c -o bish -Wall -Wextra
 
 run:
-	gcc shell.c util.c -o shell -Wall -Wextra
-	./shell
+	gcc bish.c util.c -o bish -Wall -Wextra
+	./bish
 
 clean:
-	rm -r shell *.o
+	rm -r bish *.o
