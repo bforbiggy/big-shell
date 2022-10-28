@@ -1,5 +1,12 @@
 #include "node.h"
 
+Node *init(void *val, Node *next){
+	Node *node = malloc(sizeof(Node));
+	node->val = val;
+	node->next = NULL;
+	return node;
+}
+
 /**
  * @brief Free singly linked list by value.
  * This assumes the l

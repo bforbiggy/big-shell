@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include "node.h"
 
-void split(char **args, char *string, const char delim[]);
+Node *split(char *string, const char delim[], int *size);
 bool isOperator(char c);
 int lastIndex(const char str[], char c);
 bool exists(const char *path);

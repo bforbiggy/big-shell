@@ -1,11 +1,11 @@
 #include "bish.h"
 
 void runProgram(const Program p){
-	int status;
 	int pid = fork();
 
 	// Parent process, aka "this"
 	if(pid){
+		int status;
 		waitpid(pid, &status, 0);
 	}
 	// Execute child with specified IO

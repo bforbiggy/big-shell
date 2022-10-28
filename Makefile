@@ -1,5 +1,5 @@
 default:
-	gcc bish.c -o bish -Wall -Wextra
+	gcc bish.c shell.c -o bish -Wall -Wextra
 
 run: default
 	./bish

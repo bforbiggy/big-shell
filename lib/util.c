@@ -1,19 +1,29 @@
 #include "util.h"
 
-// Splits string using delim and stores in args
-void split(char **args, char* string, const char delim[]){
+/**
+ * @brief Splits a string into a singly linked list using specified delimiter.
+ * 
+ * @param string string to split
+ * @param delim what to split with
+ * @param size a pointer to store size
+ * @return Singly linked list of all tokens
+ */
+Node *split(char* string, const char delim[], int* size){
 	char *token = strtok(string, delim);
+	*size = 1;
 
-	int i;
-	for (i = 0; i < 200; i++){
-		args[i] = token;
-		token = strtok(NULL, delim);
-		if(token == NULL)
-			break;
+	// Initialize head with token
+	Node *head = malloc(sizeof(Node));
+	head->val = token;
+	head->next = NULL;
+
+	// Parse remaining tokens
+	Node *curr = head;
+	while((token = strtok(string, delim)) != NULL){
+		curr->next = init(token, NULL);
+		curr = curr->next;
+		(*size)++;
 	}
-
-	// Null terminate
-	args[i + 1] = NULL;
 }
 
 /**

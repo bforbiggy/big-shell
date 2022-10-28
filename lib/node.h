@@ -3,13 +3,12 @@
 
 #include <stdlib.h>
 
-struct Node{
+typedef struct Node{
 	void *val;
 	struct Node *next;
-};
+}Node;
 
-typedef struct Node Node;
-
+Node *init(void *val, Node next);
 void freeList(Node *node);
 
 #endif
