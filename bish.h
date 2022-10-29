@@ -1,6 +1,7 @@
 #ifndef BISH_HEADER
 #define BISH_HEADER
 
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,6 +14,7 @@
 
 #define CD ("cd")
 #define EXIT ("exit")
+#define FG ("fg")
 
 Shell *shell;
 
