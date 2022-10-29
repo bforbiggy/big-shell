@@ -18,4 +18,6 @@
 
 Shell *shell;
 
+
+#include <errno.h>
 #endif

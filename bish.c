@@ -1,7 +1,7 @@
 #include "bish.h"
 
 int parent = 1;
-int bgID;
+int bgID = 0;
 
 void handleSig(int sig){
 	// Suspend
@@ -10,10 +10,6 @@ void handleSig(int sig){
 		if(parent){
 			kill(bgID, SIGTSTP);
 		}
-	}
-	// Continue
-	else if(sig == SIGCONT){
-		// Should continue by default iunno
 	}
 }
 
@@ -26,7 +22,7 @@ void runProgram(const Program p){
 		parent = 1;
 		bgID = pid;
 		printf("Waiting\n");
-		waitpid(pid, &status, WCONTINUED | WUNTRACED);
+		waitpid(pid, &status, WUNTRACED);
 		printf("Finished wait\n");
 	}
 	// Execute child with specified IO
@@ -62,8 +58,13 @@ void processProgram(Program *program){
 	}
 	// System command: fg
 	else if(!strcasecmp(program->args[0], FG)){
-		printf("IM RESUMING %d", bgID);
-		kill(bgID, SIGCONT);
+		if(kill(bgID, 0) != -1){
+			printf("THIS CHILD IS HERE!!!! %d\n", bgID);
+			kill(bgID, SIGCONT);
+
+			int status;
+			waitpid(bgID, &status, WUNTRACED);
+		}
 	}
 	// Run normal program
 	else{
@@ -83,7 +84,6 @@ int main(){
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
 	signal(SIGTSTP, handleSig);
-	// signal(SIGCONT, handleSig);
 
 	// Shell initialization
 	shell = malloc(sizeof(Shell));
