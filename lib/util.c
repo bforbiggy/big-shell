@@ -2,6 +2,7 @@
 
 /**
  * @brief Splits a string into a singly linked list using specified delimiter.
+ * This duplicates strings.
  * 
  * @param string string to split
  * @param delim what to split with
@@ -10,15 +11,20 @@
  */
 Node *split(char* string, const char delim[], int* size){
 	char *token = strtok(string, delim);
+	if(token == NULL){
+		*size = 0;
+		return NULL;
+	}
+
 	*size = 1;
 
 	// Initialize head with token
-	Node *head = init(token, NULL);
+	Node *head = init(copyString(token), NULL);
 
 	// Parse remaining tokens
 	Node *curr = head;
 	while((token = strtok(NULL, delim)) != NULL){
-		curr->next = init(token, NULL);
+		curr->next = init(copyString(token), NULL);
 		curr = curr->next;
 		(*size)++;
 	}
@@ -34,6 +40,20 @@ Node *split(char* string, const char delim[], int* size){
  */
 bool isOperator(char c){
 	return c == '<' || c == '>';
+}
+
+/**
+ * @brief Creates a copy of a string.
+ * 
+ * @param string string to copy
+ * @return copy of the input string
+ */
+char *copyString(const char string[]){
+	char *copy = malloc(sizeof(char) * strlen(string));
+	for(int i = 0; string[i]; i++){
+		copy[i] = string[i];
+	}
+	return copy;
 }
 
 /**

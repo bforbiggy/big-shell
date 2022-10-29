@@ -22,6 +22,21 @@ void freeList(Node *node){
 }
 
 /**
+ * @brief Free singly linked list from memory.
+ * This includes its contents.
+ * 
+ * @param head start of linked list
+ */
+void fullFreeList(Node *node){
+	while(node != NULL){
+		Node *next = node->next;
+		free(node->val);
+		free(node);
+		node = next;
+	}
+}
+
+/**
  * @brief Converts a linkedlist into array
  * 
  * @param head start of linked list

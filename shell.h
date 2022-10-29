@@ -1,6 +1,7 @@
 #ifndef SHELL_HEADER
 #define SHELL_HEADER
 
+#include <fcntl.h>
 #include <unistd.h>
 #include <limits.h>
 #include "lib/util.h"
@@ -22,6 +23,7 @@ typedef struct Program{
 } Program;
 
 Program *parseProgram(char *line);
+void freeProgram(Program *p);
 void changeDirectory(const Program p);
 
 #endif

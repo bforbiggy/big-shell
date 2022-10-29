@@ -1,15 +1,23 @@
 #include "bish.h"
 
 void runProgram(const Program p){
+	int status;
 	int pid = fork();
 
 	// Parent process, aka "this"
 	if(pid){
-		int status;
 		waitpid(pid, &status, 0);
 	}
 	// Execute child with specified IO
 	else{
+		if(p.in){
+			dup2(p.in, 0);
+			close(p.in);
+		}
+		if(p.out){
+			dup2(p.out, 1);
+			close(p.out);
+		}
 		execvp(p.args[0], p.args);
 	}
 }
@@ -18,6 +26,9 @@ void processLine(Shell *shell){
 	// Sanitize input then parse
 	shell->buffer[strlen(shell->buffer) - 1] = '\0';
 	Program *program = parseProgram(shell->buffer);
+	if(program == NULL || !program->argc){
+		return;
+	}
 
 	// System command: change directory
 	if(!strcasecmp(program->args[0], CD)){
@@ -26,10 +37,14 @@ void processLine(Shell *shell){
 	}
 	// System command: exit
 	else if(!strcasecmp(program->args[0], EXIT)){
+		free(shell);
 		exit(0);
 	}
-	else runProgram(*program);
-	free(program);
+	// Normal command
+	else{
+		runProgram(*program);
+	}
+	// freeProgram(program);
 }
 
 int main(){
