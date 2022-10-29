@@ -13,6 +13,7 @@
 typedef struct Shell{
 	char buffer[MAX_BUFFER];
 	char dir[PATH_MAX+1];
+	int child = -1;
 } Shell;
 
 typedef struct Program{

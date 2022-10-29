@@ -1,33 +1,27 @@
 #include "bish.h"
 
-int parent = 1;
-int bgID = 0;
-
 void handleSig(int sig){
-	// Suspend
+	// Suspend child
 	if(sig == SIGTSTP){
-		// Suspend child
-		if(parent){
-			kill(bgID, SIGTSTP);
+		if(shell->child){
+			kill(shell->child, SIGTSTP);
 		}
 	}
 }
 
 void runProgram(const Program p){
 	int status;
-	int pid = fork();
+	shell->child = fork();
 
 	// Parent process, aka "this"
-	if(pid){
-		parent = 1;
-		bgID = pid;
+	if(shell->child){
 		printf("Waiting\n");
-		waitpid(pid, &status, WUNTRACED);
+		waitpid(shell->child, &status, WUNTRACED);
 		printf("Finished wait\n");
 	}
 	// Execute child with specified IO
 	else{
-		parent = 0;
+		shell->child = 0;
 		if(p.in){
 			dup2(p.in, 0);
 			close(p.in);
@@ -58,7 +52,7 @@ void processProgram(Program *program){
 	}
 	// System command: fg
 	else if(!strcasecmp(program->args[0], FG)){
-		if(kill(bgID, 0) != -1){
+		if(kill(shell->child, 0) != -1){
 			printf("THIS CHILD IS HERE!!!! %d\n", bgID);
 			kill(bgID, SIGCONT);
 
