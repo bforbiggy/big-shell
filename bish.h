@@ -14,4 +14,6 @@
 #define CD ("cd")
 #define EXIT ("exit")
 
+Shell *shell;
+
 #endif

@@ -22,10 +22,8 @@ void runProgram(const Program p){
 	}
 }
 
-void processLine(Shell *shell){
-	// Sanitize input then parse
-	shell->buffer[strlen(shell->buffer) - 1] = '\0';
-	Program *program = parseProgram(shell->buffer);
+void processProgram(Program *program){
+	// Ignore invalid programs
 	if(program == NULL || !program->argc){
 		return;
 	}
@@ -40,11 +38,17 @@ void processLine(Shell *shell){
 		free(shell);
 		exit(0);
 	}
-	// Normal command
+	// Run normal program
 	else{
 		runProgram(*program);
 	}
-	// freeProgram(program);
+}
+
+void processLine(){
+	// Sanitize input then parse
+	shell->buffer[strlen(shell->buffer) - 1] = '\0';
+	Program *program = parseProgram(shell->buffer);
+	processProgram(program);
 }
 
 int main(){
@@ -53,14 +57,14 @@ int main(){
 	setvbuf(stdout, NULL, _IONBF, 0);
 
 	// Shell initialization
-	Shell *shell = malloc(sizeof(Shell));
+	shell = malloc(sizeof(Shell));
 	getcwd(shell->dir, PATH_MAX);
 
 	// Run through program
 	while(true){
 		printf("[bish %s]$ ", shell->dir);
 		fgets(shell->buffer, MAX_BUFFER, stdin);
-		processLine(shell);
+		processLine();
 	}
 
 	return 0;
