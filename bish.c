@@ -15,9 +15,7 @@ void runProgram(const Program p){
 
 	// Parent process, aka "this"
 	if(shell->child){
-		printf("Waiting\n");
 		waitpid(shell->child, &status, WUNTRACED);
-		printf("Finished wait\n");
 	}
 	// Execute child with specified IO
 	else{
@@ -53,11 +51,10 @@ void processProgram(Program *program){
 	// System command: fg
 	else if(!strcasecmp(program->args[0], FG)){
 		if(kill(shell->child, 0) != -1){
-			printf("THIS CHILD IS HERE!!!! %d\n", bgID);
-			kill(bgID, SIGCONT);
+			kill(shell->child, SIGCONT);
 
 			int status;
-			waitpid(bgID, &status, WUNTRACED);
+			waitpid(shell->child, &status, WUNTRACED);
 		}
 	}
 	// Run normal program
