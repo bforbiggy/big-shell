@@ -55,11 +55,8 @@ void runProcess(Process *process){
 	if(!process->count || runShellCommand(process->programs[0]))
 		return;
 
-	// Create process runner
-	process->pid = fork();
-
-	// Parent aka the shell (waits for process runner to finish)
-	if(process->pid){
+	// Parent aka the shell (creates & waits for process runner)
+	if((process->pid = fork())){
 		shell->isShell = true;
 
 		int status;
@@ -79,19 +76,15 @@ void runProcess(Process *process){
 }
 
 void processLine(){
-	// Initialization and sanitization
+	// Process initializaion and input sanitization
 	Process *process = malloc(sizeof(Process));
 	shell->buffer[strlen(shell->buffer) - 1] = '\0';
 
-	// Split process string into program strings
+	// Split process string into program strings to be parsed
 	Node *programStrings = split(shell->buffer, "|", &process->count);
 	Program **programs = malloc(sizeof(Program*) * (process->count));
-
-	// Parse program strings into program
-	for (int i = 0; i < process->count; i++)
-	{
-		Program *program = parseProgram((char*)programStrings->val);
-		programs[i] = program;
+	for (int i = 0; i < process->count; i++){
+		programs[i] = parseProgram(programStrings->val);
 		programStrings = programStrings->next;
 	}
 	process->programs = programs;
@@ -106,12 +99,12 @@ int main(){
 	// Automatic flushing
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
-	signal(SIGTSTP, handleSuspend);
-	signal(SIGCONT, handleContinue);
 
 	// Shell initialization
 	shell = malloc(sizeof(Shell));
 	getcwd(shell->dir, PATH_MAX);
+	signal(SIGTSTP, handleSuspend);
+	signal(SIGCONT, handleContinue);
 
 	// Run through program
 	while(true){
