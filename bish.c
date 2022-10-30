@@ -38,25 +38,25 @@ bool runShellCommand(Program *p){
 	if(!strcasecmp(p->args[0], CD)){
 		changeDirectory(*p);
 		getcwd(shell->dir, PATH_MAX);
-		return true;
 	}
 	// System command: exit
 	else if(!strcasecmp(p->args[0], EXIT)){
 		free(shell);
 		exit(0);
-		return true;
 	}
 	// System command: fg
 	else if(!strcasecmp(p->args[0], FG)){
 		if(kill(shell->child, 0) != -1){
 			kill(shell->child, SIGCONT);
-
 			int status;
 			waitpid(shell->child, &status, WUNTRACED);
 		}
-		return true;
 	}
-	return false;
+	// No system command found.
+	else{
+		return false;
+	}
+	return true;
 }
 
 void runProcess(Process *process){
@@ -66,12 +66,12 @@ void runProcess(Process *process){
 	}
 
 	// Run normal program if no shell command was found
-	if(!runShellCommand(process->programs[0])){
-		printf("Running normal program: %s\n");
-		// runProgram(*program);
-	}
-	else{
-		printf("Running system command\n");
+	if(runShellCommand(process->programs[0]))
+		return;
+
+	// Run all programs in process (process->count)
+	for (int i = 0; i < process->count; i++){ 
+		runProgram(*process->programs[i]);
 	}
 }
 
@@ -83,17 +83,15 @@ void processLine(){
 
 	// Split process string into program strings
 	Node *programStrings = split(shell->buffer, "|", &process->count);
-	Program **programs = malloc(sizeof(Program*) * (process->count+1));
+	Program **programs = malloc(sizeof(Program*) * (process->count));
 
 	// Parse program strings into program
-	int i;
-	for (i = 0; i < process->count; i++)
+	for (int i = 0; i < process->count; i++)
 	{
 		Program *program = parseProgram((char*)programStrings->val);
 		programs[i] = program;
 		programStrings = programStrings->next;
 	}
-	programs[i] = NULL;
 	process->programs = programs;
 
 	runProcess(process);
