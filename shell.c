@@ -55,6 +55,7 @@ void runProgram(Program p, int pipeIn, int pipeOut){
 
 	// Parent: Wait for process to finish
 	if(p.pid){
+		printf("Current pid: %d", p.pid);
 		waitpid(p.pid, &status, WUNTRACED);
 	}
 	// Child: Run process

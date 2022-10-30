@@ -4,11 +4,6 @@ void handleSuspend(int sig){
 	if(sig != SIGTSTP)
 		return;
 
-	// Process runners execute default behaviour
-	if(!shell->isShell){
-		signal(SIGTSTP, SIG_DFL);
-		raise(SIGTSTP);
-	}
 }
 
 void handleContinue(int sig){
@@ -16,8 +11,10 @@ void handleContinue(int sig){
 		return;
 
 	// If process runner, resume current program if it exists
-	if(!shell->isShell && shell->currentProgram->pid){
+	if(!shell->isShell){
+		int status;
 		kill(shell->currentProgram->pid, SIGCONT);
+		waitpid(shell->currentProgram->pid, &status, WUNTRACED);
 	}
 }
 
@@ -33,15 +30,35 @@ bool runShellCommand(Program *p){
 		free(shell);
 		exit(0);
 	}
+	// System command: jobs
+	else if(!strcasecmp(p->args[0], JOBS)){
+		Node *curr = shell->children;
+
+		// Print out all suspended processes
+		for (int i = 1; curr != NULL; i++){
+			Process *process = curr->val;
+			printf("[%d]", i);
+
+			// Print out all programs in suspended process
+			for (int j = 0; j < process->count; j++){
+				Program *p = process->programs[j];
+				// Print out all program args
+				for (int h = 0; h < p->argc; h++){
+					printf(" %s", p->args[h]);
+				}
+			}
+			curr = curr->next;
+			printf("\n");
+		}
+	}
 	// System command: fg (auto suspends first one for now)
 	else if(!strcasecmp(p->args[0], FG)){
-		// Continue process runner
-		int *childPID = shell->children->val;
-		kill(*childPID, SIGCONT);
+		Process *p = shell->children->val;
 
-		// Wait for process runner to finish
+		// Continue process runner and wait
+		kill(p->pid, SIGCONT);
 		int status;
-		waitpid(*childPID, &status, WUNTRACED);
+		waitpid(p->pid, &status, WUNTRACED);
 	}
 	// No system command found.
 	else{
@@ -55,16 +72,19 @@ void runProcess(Process *process){
 	if(!process->count || runShellCommand(process->programs[0]))
 		return;
 
+	// Add process to shell's children
+	Node *newProcess = init(process, shell->children);
+	shell->children = newProcess;
+
 	// Parent aka the shell (creates & waits for process runner)
 	if((process->pid = fork())){
-		shell->isShell = true;
-
 		int status;
 		waitpid(process->pid, &status, WUNTRACED);
 	}
 	// Child aka process runner (runs through all processes)
 	else{
 		shell->isShell = false;
+		signal(SIGTSTP, SIG_DFL);
 
 		// Run all programs, waiting for each one
 		for (int i = 0; i < process->count; i++){
@@ -89,9 +109,7 @@ void processLine(){
 	}
 	process->programs = programs;
 
-	// Add new process to shell's children then run
-	Node *newProcess = init(process, NULL);
-	shell->children = newProcess;
+	// Run Process
 	runProcess(process);
 }
 
@@ -102,6 +120,8 @@ int main(){
 
 	// Shell initialization
 	shell = malloc(sizeof(Shell));
+	shell->children = NULL;
+	shell->isShell = true;
 	getcwd(shell->dir, PATH_MAX);
 	signal(SIGTSTP, handleSuspend);
 	signal(SIGCONT, handleContinue);

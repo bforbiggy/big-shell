@@ -30,7 +30,8 @@ typedef struct Shell{
 	char dir[PATH_MAX+1];
 
 	bool isShell;
-	Node *children;
+
+	Node *children; // Most recent first
 	Program *currentProgram;
 } Shell;
 

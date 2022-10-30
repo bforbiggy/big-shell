@@ -15,6 +15,7 @@
 #define CD ("cd")
 #define EXIT ("exit")
 #define FG ("fg")
+#define JOBS ("jobs")
 
 Shell *shell;
 
