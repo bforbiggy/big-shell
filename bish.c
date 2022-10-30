@@ -1,34 +1,23 @@
 #include "bish.h"
 
-void handleSig(int sig){
-	// Suspend child
-	if(sig == SIGTSTP){
-		if(shell->child){
-			kill(shell->child, SIGTSTP);
-		}
+void handleSuspend(int sig){
+	if(sig != SIGTSTP)
+		return;
+
+	// Process runners execute default behaviour
+	if(!shell->isShell){
+		signal(SIGTSTP, SIG_DFL);
+		raise(SIGTSTP);
 	}
 }
 
-void runProgram(const Program p){
-	int status;
-	shell->child = fork();
+void handleContinue(int sig){
+	if(sig != SIGCONT)
+		return;
 
-	// Parent process, aka "this"
-	if(shell->child){
-		waitpid(shell->child, &status, WUNTRACED);
-	}
-	// Execute child with specified IO
-	else{
-		shell->child = 0;
-		if(p.in){
-			dup2(p.in, 0);
-			close(p.in);
-		}
-		if(p.out){
-			dup2(p.out, 1);
-			close(p.out);
-		}
-		execvp(p.args[0], p.args);
+	// If process runner, resume current program if it exists
+	if(!shell->isShell && shell->currentProgram->pid){
+		kill(shell->currentProgram->pid, SIGCONT);
 	}
 }
 
@@ -44,13 +33,15 @@ bool runShellCommand(Program *p){
 		free(shell);
 		exit(0);
 	}
-	// System command: fg
+	// System command: fg (auto suspends first one for now)
 	else if(!strcasecmp(p->args[0], FG)){
-		if(kill(shell->child, 0) != -1){
-			kill(shell->child, SIGCONT);
-			int status;
-			waitpid(shell->child, &status, WUNTRACED);
-		}
+		// Continue process runner
+		int *childPID = shell->children->val;
+		kill(*childPID, SIGCONT);
+
+		// Wait for process runner to finish
+		int status;
+		waitpid(*childPID, &status, WUNTRACED);
 	}
 	// No system command found.
 	else{
@@ -60,18 +51,30 @@ bool runShellCommand(Program *p){
 }
 
 void runProcess(Process *process){
-	// Ignore empty processes
-	if(!process->count){
+	// Ignore empty commands/Override with shell commands if detected
+	if(!process->count || runShellCommand(process->programs[0]))
 		return;
+
+	// Create process runner
+	process->pid = fork();
+
+	// Parent aka the shell (waits for process runner to finish)
+	if(process->pid){
+		shell->isShell = true;
+
+		int status;
+		waitpid(process->pid, &status, WUNTRACED);
 	}
+	// Child aka process runner (runs through all processes)
+	else{
+		shell->isShell = false;
 
-	// Run normal program if no shell command was found
-	if(runShellCommand(process->programs[0]))
-		return;
-
-	// Run all programs in process (process->count)
-	for (int i = 0; i < process->count; i++){ 
-		runProgram(*process->programs[i]);
+		// Run all programs, waiting for each one
+		for (int i = 0; i < process->count; i++){
+			shell->currentProgram = process->programs[i];
+			runProgram(*process->programs[i], 0, 0);
+		}
+		exit(0);
 	}
 }
 
@@ -79,7 +82,6 @@ void processLine(){
 	// Initialization and sanitization
 	Process *process = malloc(sizeof(Process));
 	shell->buffer[strlen(shell->buffer) - 1] = '\0';
-	shell->child = -1;
 
 	// Split process string into program strings
 	Node *programStrings = split(shell->buffer, "|", &process->count);
@@ -94,6 +96,9 @@ void processLine(){
 	}
 	process->programs = programs;
 
+	// Add new process to shell's children then run
+	Node *newProcess = init(process, NULL);
+	shell->children = newProcess;
 	runProcess(process);
 }
 
@@ -101,7 +106,8 @@ int main(){
 	// Automatic flushing
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
-	signal(SIGTSTP, handleSig);
+	signal(SIGTSTP, handleSuspend);
+	signal(SIGCONT, handleContinue);
 
 	// Shell initialization
 	shell = malloc(sizeof(Shell));

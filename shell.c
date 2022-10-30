@@ -48,6 +48,35 @@ Program *parseProgram(char *line){
 	return program;
 }
 
+// Run program and sets program's pid
+void runProgram(Program p, int pipeIn, int pipeOut){
+	int status;
+	p.pid = fork();
+
+	// Parent: Wait for process to finish
+	if(p.pid){
+		waitpid(p.pid, &status, WUNTRACED);
+	}
+	// Child: Run process
+	else{
+		// Set input if available
+		int in = p.in ? p.in : pipeIn;
+		if(in){
+			dup2(in, 0);
+			close(in);
+		}
+
+		// Set output if available
+		int out = p.out ? p.out : pipeOut;
+		if(out){
+			dup2(out, 1);
+			close(out);
+		}
+
+		execvp(p.args[0], p.args);
+	}
+}
+
 void freeProgram(Program *p){
 	for(int i = 0; i < p->argc; i++){
 		free(p->args[i]);
