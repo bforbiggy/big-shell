@@ -6,18 +6,9 @@
 #include <limits.h>
 #include <sys/wait.h>
 #include "lib/util.h"
+#include "lib/program.h"
+#include "lib/constants.h"
 
-#define ERR_CMD ("Error: invalid command\n")
-#define ERR_DIR ("Error: invalid directory\n")
-#define MAX_BUFFER (1000)
-
-typedef struct Program{
-	int pid;
-	char **args;
-	int argc;
-	int in;
-	int out;
-} Program;
 
 typedef struct Process{
 	int pid;
@@ -35,9 +26,9 @@ typedef struct Shell{
 	Program *currentProgram;
 } Shell;
 
-Program *parseProgram(char *line);
-void runProgram(const Program p, int pipeIn, int pipeOut);
-void freeProgram(Program *p);
-void changeDirectory(const Program p);
+void changeDirectory(Shell *shell, const Program p);
+void jobs(Shell *shell);
+void fg(Shell *shell, int index);
+void shellExit(Shell *shell);
 
 #endif

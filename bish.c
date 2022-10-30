@@ -4,13 +4,18 @@ void handleSuspend(int sig){
 	if(sig != SIGTSTP)
 		return;
 
+	// If process runner, execute default suspend
+	if(!shell->isShell){
+		signal(SIGTSTP, SIG_DFL);
+		raise(SIGTSTP);
+	}
 }
 
 void handleContinue(int sig){
 	if(sig != SIGCONT)
 		return;
 
-	// If process runner, resume current program if it exists
+	// If process runner, resume current program
 	if(!shell->isShell){
 		int status;
 		kill(shell->currentProgram->pid, SIGCONT);
@@ -21,49 +26,20 @@ void handleContinue(int sig){
 // Runs shell process, returning true if it's a shell
 bool runShellCommand(Program *p){
 	// System command: change directory
-	if(!strcasecmp(p->args[0], CD)){
-		changeDirectory(*p);
-		getcwd(shell->dir, PATH_MAX);
-	}
+	if(!strcasecmp(p->args[0], CD))
+		changeDirectory(shell, *p);
 	// System command: exit
-	else if(!strcasecmp(p->args[0], EXIT)){
-		free(shell);
-		exit(0);
-	}
+	else if(!strcasecmp(p->args[0], EXIT))
+		shellExit(shell);
 	// System command: jobs
-	else if(!strcasecmp(p->args[0], JOBS)){
-		Node *curr = shell->children;
-
-		// Print out all suspended processes
-		for (int i = 1; curr != NULL; i++){
-			Process *process = curr->val;
-			printf("[%d]", i);
-
-			// Print out all programs in suspended process
-			for (int j = 0; j < process->count; j++){
-				Program *p = process->programs[j];
-				// Print out all program args
-				for (int h = 0; h < p->argc; h++){
-					printf(" %s", p->args[h]);
-				}
-			}
-			curr = curr->next;
-			printf("\n");
-		}
-	}
+	else if(!strcasecmp(p->args[0], JOBS))
+		jobs(shell);
 	// System command: fg (auto suspends first one for now)
-	else if(!strcasecmp(p->args[0], FG)){
-		Process *p = shell->children->val;
-
-		// Continue process runner and wait
-		kill(p->pid, SIGCONT);
-		int status;
-		waitpid(p->pid, &status, WUNTRACED);
-	}
+	else if(!strcasecmp(p->args[0], FG))
+		fg(shell, 0);
 	// No system command found.
-	else{
+	else
 		return false;
-	}
 	return true;
 }
 
@@ -84,7 +60,6 @@ void runProcess(Process *process){
 	// Child aka process runner (runs through all processes)
 	else{
 		shell->isShell = false;
-		signal(SIGTSTP, SIG_DFL);
 
 		// Run all programs, waiting for each one
 		for (int i = 0; i < process->count; i++){
