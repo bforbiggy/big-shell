@@ -32,42 +32,71 @@ void runProgram(const Program p){
 	}
 }
 
-void processProgram(Program *program){
-	// Ignore invalid programs
-	if(program == NULL || !program->argc){
-		return;
-	}
-
+// Runs shell process, returning true if it's a shell
+bool runShellCommand(Program *p){
 	// System command: change directory
-	if(!strcasecmp(program->args[0], CD)){
-		changeDirectory(*program);
+	if(!strcasecmp(p->args[0], CD)){
+		changeDirectory(*p);
 		getcwd(shell->dir, PATH_MAX);
+		return true;
 	}
 	// System command: exit
-	else if(!strcasecmp(program->args[0], EXIT)){
+	else if(!strcasecmp(p->args[0], EXIT)){
 		free(shell);
 		exit(0);
+		return true;
 	}
 	// System command: fg
-	else if(!strcasecmp(program->args[0], FG)){
+	else if(!strcasecmp(p->args[0], FG)){
 		if(kill(shell->child, 0) != -1){
 			kill(shell->child, SIGCONT);
 
 			int status;
 			waitpid(shell->child, &status, WUNTRACED);
 		}
+		return true;
 	}
-	// Run normal program
+	return false;
+}
+
+void runProcess(Process *process){
+	// Ignore empty processes
+	if(!process->count){
+		return;
+	}
+
+	// Run normal program if no shell command was found
+	if(!runShellCommand(process->programs[0])){
+		printf("Running normal program: %s\n");
+		// runProgram(*program);
+	}
 	else{
-		runProgram(*program);
+		printf("Running system command\n");
 	}
 }
 
 void processLine(){
-	// Sanitize input then parse
+	// Initialization and sanitization
+	Process *process = malloc(sizeof(Process));
 	shell->buffer[strlen(shell->buffer) - 1] = '\0';
-	Program *program = parseProgram(shell->buffer);
-	processProgram(program);
+	shell->child = -1;
+
+	// Split process string into program strings
+	Node *programStrings = split(shell->buffer, "|", &process->count);
+	Program **programs = malloc(sizeof(Program*) * (process->count+1));
+
+	// Parse program strings into program
+	int i;
+	for (i = 0; i < process->count; i++)
+	{
+		Program *program = parseProgram((char*)programStrings->val);
+		programs[i] = program;
+		programStrings = programStrings->next;
+	}
+	programs[i] = NULL;
+	process->programs = programs;
+
+	runProcess(process);
 }
 
 int main(){

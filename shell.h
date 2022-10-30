@@ -13,7 +13,7 @@
 typedef struct Shell{
 	char buffer[MAX_BUFFER];
 	char dir[PATH_MAX+1];
-	int child = -1;
+	int child;
 } Shell;
 
 typedef struct Program{
@@ -22,6 +22,11 @@ typedef struct Program{
 	int in;
 	int out;
 } Program;
+
+typedef struct Process{
+	Program **programs;
+	int count;
+} Process;
 
 Program *parseProgram(char *line);
 void freeProgram(Program *p);
