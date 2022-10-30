@@ -56,6 +56,10 @@ void runProcess(Process *process){
 	if((process->pid = fork())){
 		int status;
 		waitpid(process->pid, &status, WUNTRACED);
+
+		// Remove child from list if it finishes execution without interrupt
+		if(waitpid(process->pid, &status, WNOHANG))
+			shell->children = shell->children->next;
 	}
 	// Child aka process runner (runs through all processes)
 	else{
