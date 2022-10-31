@@ -65,10 +65,10 @@ void runProgram(Program p, int pipeIn, int pipeOut){
 	// Child: Run process
 	else{
 		// Set input/output
-		int in = p.in ? p.in : pipeIn;
-		int out = p.out ? p.out : pipeOut;
-		if(in) dup2(in, 0);
-		if(out) dup2(out, 1);\
+		if(p.in) dup2(p.in, 0);
+		else if(pipeIn) dup2(pipeIn, 0);
+		if(p.out) dup2(p.out, 1);
+		else if(pipeOut) dup2(pipeOut, 1);
 
 		// Run program
 		execvp(p.args[0], p.args);
