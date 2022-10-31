@@ -66,10 +66,24 @@ void runProcess(Process *process){
 		shell->isShell = false;
 
 		// Run all programs, waiting for each one
-		for (int i = 0; i < process->count; i++){
+		int prevPipe[2] = {0, 0};
+		int currPipe[2] = {0, 0};
+		for (int i = 0; i < process->count - 1; i++){
 			shell->currentProgram = process->programs[i];
-			runProgram(*process->programs[i], 0, 0);
+			pipe(currPipe);
+			close(prevPipe[1]);
+			runProgram(*process->programs[i], prevPipe[0], currPipe[1]);
+			close(currPipe[1]);
+
+			prevPipe[0] = currPipe[0];
+			prevPipe[1] = currPipe[1];
 		}
+
+		// Run last program
+		close(currPipe[1]);
+		runProgram(*process->programs[process->count-1], prevPipe[0], 0);
+		if(prevPipe[0])
+			close(prevPipe[0]);
 		exit(0);
 	}
 }
