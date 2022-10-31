@@ -43,7 +43,6 @@ void fg(Shell *shell, const Program p){
 	}
 	int index = atoi(p.args[1]) - 1;
 
-	printf("Yo printing out node #%d\n", index);
 	// Continue process
 	Process *process = getNode(shell->children, index)->val;
 	kill(process->pid, SIGCONT);
