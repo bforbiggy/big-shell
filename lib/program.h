@@ -16,6 +16,6 @@ typedef struct Program{
 } Program;
 
 Program *parseProgram(char *line);
-void runProgram(const Program p);
+void runProgram(const Program p, int pipeIn, int pipeOut);
 
 #endif

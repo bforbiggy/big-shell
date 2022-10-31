@@ -70,26 +70,17 @@ void runProcess(Process *process){
 		int currPipe[2] = {0, 0};
 		for (int i = 0; i < process->count - 1; i++){
 			pipe(currPipe);
-			if(prevPipe[1]) close(prevPipe[1]);
+			runProgram(*process->programs[i], prevPipe[0], currPipe[1]);
 
-			Program *currProgram = process->programs[i];
-			shell->currentProgram = currProgram;
-			if(!currProgram->in) currProgram->in = prevPipe[0];
-			if(!currProgram->out) currProgram->out = currPipe[1];
-			runProgram(*currProgram);
-
-			if(currPipe[1]) close(currPipe[1]);
+			// Pipe iteration
 			prevPipe[0] = currPipe[0];
 			prevPipe[1] = currPipe[1];
 		}
 
 		// Run last program
-		if(currPipe[1]) close(currPipe[1]);
 		Program *last = process->programs[process->count - 1];
 		if(!last->in) last->in = prevPipe[0];
-		runProgram(*last);
-		if(prevPipe[0])
-			close(prevPipe[0]);
+		runProgram(*last, prevPipe[0], 0);
 		exit(0);
 	}
 }
