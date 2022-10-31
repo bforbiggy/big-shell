@@ -51,3 +51,18 @@ void **toArray(Node *head, int count){
 	arr[count] = NULL;
 	return arr;
 }
+
+/**
+ * @brief Get node at specified index
+ * 
+ * @param node start of linked list
+ * @param target target node to get (0-indexed)
+ * @return the retrieved node 
+*/
+Node *getNode(Node *node, int target){
+	while(node && target){
+		node = node->next;
+		target--;
+	}
+	return node;
+}

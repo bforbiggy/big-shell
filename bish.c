@@ -36,7 +36,7 @@ bool runShellCommand(Program *p){
 		jobs(shell);
 	// System command: fg (auto suspends first one for now)
 	else if(!strcasecmp(p->args[0], FG))
-		fg(shell, 0);
+		fg(shell, *p);
 	// No system command found.
 	else
 		return false;
@@ -69,19 +69,25 @@ void runProcess(Process *process){
 		int prevPipe[2] = {0, 0};
 		int currPipe[2] = {0, 0};
 		for (int i = 0; i < process->count - 1; i++){
-			shell->currentProgram = process->programs[i];
 			pipe(currPipe);
-			close(prevPipe[1]);
-			runProgram(*process->programs[i], prevPipe[0], currPipe[1]);
-			close(currPipe[1]);
+			if(prevPipe[1]) close(prevPipe[1]);
 
+			Program *currProgram = process->programs[i];
+			shell->currentProgram = currProgram;
+			if(!currProgram->in) currProgram->in = prevPipe[0];
+			if(!currProgram->out) currProgram->out = currPipe[1];
+			runProgram(*currProgram);
+
+			if(currPipe[1]) close(currPipe[1]);
 			prevPipe[0] = currPipe[0];
 			prevPipe[1] = currPipe[1];
 		}
 
 		// Run last program
-		close(currPipe[1]);
-		runProgram(*process->programs[process->count-1], prevPipe[0], 0);
+		if(currPipe[1]) close(currPipe[1]);
+		Program *last = process->programs[process->count - 1];
+		if(!last->in) last->in = prevPipe[0];
+		runProgram(*last);
 		if(prevPipe[0])
 			close(prevPipe[0]);
 		exit(0);

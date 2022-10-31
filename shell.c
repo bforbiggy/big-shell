@@ -37,14 +37,20 @@ void jobs(Shell *shell){
 	}
 }
 
-void fg(Shell *shell, int index){
+void fg(Shell *shell, const Program p){
+	if(p.argc != 2){
+		fprintf(stderr, ERR_CMD);
+	}
+	int index = atoi(p.args[1]) - 1;
+
+	printf("Yo printing out node #%d\n", index);
 	// Continue process
-	Process *p = shell->children->val;
-	kill(p->pid, SIGCONT);
+	Process *process = getNode(shell->children, index)->val;
+	kill(process->pid, SIGCONT);
 	
 	// Wait for process
 	int status;
-	waitpid(p->pid, &status, WUNTRACED);
+	waitpid(process->pid, &status, WUNTRACED);
 }
 
 void shellExit(Shell *shell){

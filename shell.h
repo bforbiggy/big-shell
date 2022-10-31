@@ -28,7 +28,7 @@ typedef struct Shell{
 
 void changeDirectory(Shell *shell, const Program p);
 void jobs(Shell *shell);
-void fg(Shell *shell, int index);
+void fg(Shell *shell, const Program p);
 void shellExit(Shell *shell);
 
 #endif

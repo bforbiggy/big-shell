@@ -49,7 +49,7 @@ Program *parseProgram(char *line){
 }
 
 // Run program and sets program's pid
-void runProgram(Program p, int pipeIn, int pipeOut){
+void runProgram(Program p){
 	int status;
 	p.pid = fork();
 
@@ -60,17 +60,15 @@ void runProgram(Program p, int pipeIn, int pipeOut){
 	// Child: Run process
 	else{
 		// Set input if available
-		int in = p.in ? p.in : pipeIn;
-		if(in){
-			dup2(in, 0);
-			close(in);
+		if(p.in){
+			dup2(p.in, 0);
+			close(p.in);
 		}
 
 		// Set output if available
-		int out = p.out ? p.out : pipeOut;
-		if(out){
-			dup2(out, 1);
-			close(out);
+		if(p.out){
+			dup2(p.out, 1);
+			close(p.out);
 		}
 
 		execvp(p.args[0], p.args);
